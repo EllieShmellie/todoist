@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, Eye, EyeOff, Info, LoaderCircle, Minus, MoveDownRight } from '@lucide/vue'
+import { AlertCircle, Eye, EyeOff, Info, LoaderCircle } from '@lucide/vue'
 import { getApiErrorMessage } from '~/utils/tasks'
 
 definePageMeta({ middleware: 'guest' })
@@ -53,18 +53,6 @@ function fillAccount(account: 'user' | 'admin'): void {
     </header>
 
     <section class="auth-page__content">
-      <div class="auth-promise" aria-hidden="true">
-        <p>
-          Меньше<br>
-          шума.<br>
-          <strong>Больше<br>сделанного.</strong>
-        </p>
-        <div class="auth-promise__stroke">
-          <Minus :size="188" :stroke-width="1.4" />
-          <MoveDownRight :size="80" :stroke-width="1.5" />
-        </div>
-      </div>
-
       <div class="auth-form-wrap">
         <form class="auth-form" novalidate @submit.prevent="submit">
           <div class="auth-form__heading">
