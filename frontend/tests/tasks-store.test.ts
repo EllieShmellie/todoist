@@ -6,6 +6,7 @@ import type { PaginatedResponse, ResourceResponse, Task, TaskPayload, TaskQuery 
 const defaultQuery: TaskQuery = {
   search: '',
   status: '',
+  user_id: null,
   sort: 'due_date',
   direction: 'asc',
   page: 1,
@@ -63,6 +64,7 @@ describe('tasks store API behavior', () => {
       links: { first: null, last: null, prev: null, next: null },
       meta: { current_page: 2, from: 11, last_page: 3, per_page: 10, to: 11, total: 21 },
       summary: { total: 21, pending: 8, in_progress: 7, completed: 6, overdue: 2 },
+      filter_options: { users: [task.user] },
     }
     api.mockResolvedValue(response)
     const store = useTasksStore()
@@ -78,6 +80,7 @@ describe('tasks store API behavior', () => {
       query: {
         search: 'README',
         status: 'pending',
+        user_id: undefined,
         sort: 'due_date',
         direction: 'asc',
         page: 2,
@@ -87,6 +90,7 @@ describe('tasks store API behavior', () => {
     expect(store.items).toEqual([task])
     expect(store.meta).toEqual(response.meta)
     expect(store.summary).toEqual(response.summary)
+    expect(store.availableUsers).toEqual([task.user])
     expect(store.loading).toBe(false)
     expect(store.error).toBe('')
   })

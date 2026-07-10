@@ -8,6 +8,7 @@ use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
@@ -41,6 +42,7 @@ class TaskController extends Controller
 
         $query = (clone $visibleTasks)
             ->with('user')
+            ->when($filters['user_id'] ?? null, fn ($query, $userId) => $query->where('user_id', $userId))
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('title', 'like', "%{$search}%")
@@ -56,6 +58,16 @@ class TaskController extends Controller
             $query->orderByRaw(
                 "CASE status WHEN 'pending' THEN 1 WHEN 'in_progress' THEN 2 WHEN 'completed' THEN 3 ELSE 4 END {$direction}"
             );
+        } elseif ($sort === 'user') {
+            $query
+                ->orderBy(
+                    User::query()->select('name')->whereColumn('users.id', 'tasks.user_id'),
+                    $direction,
+                )
+                ->orderBy(
+                    User::query()->select('email')->whereColumn('users.id', 'tasks.user_id'),
+                    $direction,
+                );
         } else {
             if ($sort === 'due_date') {
                 $query->orderByRaw('due_date IS NULL ASC');
@@ -71,6 +83,20 @@ class TaskController extends Controller
 
         return TaskResource::collection($tasks)->additional([
             'summary' => $summary,
+            'filter_options' => [
+                'users' => $user->isAdmin()
+                    ? User::query()
+                        ->orderBy('name')
+                        ->orderBy('email')
+                        ->get(['id', 'name', 'email'])
+                        ->map(fn (User $owner): array => [
+                            'id' => $owner->id,
+                            'name' => $owner->name,
+                            'email' => $owner->email,
+                        ])
+                        ->all()
+                    : [],
+            ],
         ]);
     }
 

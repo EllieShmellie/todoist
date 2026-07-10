@@ -68,6 +68,30 @@ class TaskIndexTest extends TestCase
             ->assertJsonPath('data.1.status', TaskStatus::Pending->value);
     }
 
+    public function test_admin_can_filter_and_sort_tasks_by_user(): void
+    {
+        $admin = User::factory()->admin()->create(['name' => 'Администратор']);
+        $anna = User::factory()->create(['name' => 'Анна', 'email' => 'anna@example.com']);
+        $boris = User::factory()->create(['name' => 'Борис', 'email' => 'boris@example.com']);
+        Task::factory()->for($boris)->create(['title' => 'Boris task']);
+        Task::factory()->for($anna)->create(['title' => 'Anna task']);
+        Sanctum::actingAs($admin);
+
+        $this->getJson('/api/tasks?sort=user&direction=asc')
+            ->assertOk()
+            ->assertJsonPath('data.0.user.id', $anna->id)
+            ->assertJsonPath('data.1.user.id', $boris->id)
+            ->assertJsonPath('filter_options.users.0.name', 'Администратор')
+            ->assertJsonPath('filter_options.users.1.name', 'Анна')
+            ->assertJsonPath('filter_options.users.2.name', 'Борис');
+
+        $this->getJson("/api/tasks?user_id={$boris->id}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.user.id', $boris->id)
+            ->assertJsonPath('data.0.title', 'Boris task');
+    }
+
     public function test_status_sort_uses_business_order_and_due_date_sort_honors_direction(): void
     {
         $user = User::factory()->create();
@@ -169,5 +193,16 @@ class TaskIndexTest extends TestCase
                 'message',
                 'errors' => ['status', 'sort', 'direction', 'per_page'],
             ]);
+    }
+
+    public function test_regular_user_cannot_filter_tasks_by_owner(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->getJson("/api/tasks?user_id={$otherUser->id}")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('user_id');
     }
 }

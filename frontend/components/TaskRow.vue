@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Edit3, LoaderCircle, Trash2 } from '@lucide/vue'
 import type { Task, TaskStatus } from '~/types/api'
-import { formatTaskDate, formatTaskWeekday, isTaskOverdue, STATUS_META } from '~/utils/tasks'
+import { formatTaskDate, formatTaskWeekday, isTaskOverdue } from '~/utils/tasks'
 
 const props = defineProps<{
   task: Task
@@ -58,10 +58,6 @@ function updateSelected(event: Event): void {
     </div>
 
     <div class="task-row__status" role="cell" data-label="Статус">
-      <div class="status-caption">
-        <span class="status-dot" :style="{ backgroundColor: STATUS_META[task.status].color }" aria-hidden="true" />
-        {{ STATUS_META[task.status].label }}
-      </div>
       <StatusSelect
         v-if="task.can.update"
         :model-value="task.status"

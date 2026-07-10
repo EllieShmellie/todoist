@@ -1,4 +1,4 @@
-const AUTH_TOKEN_KEY = 'focus.auth.token'
+const AUTH_TOKEN_KEY = 'todo.auth.token'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()

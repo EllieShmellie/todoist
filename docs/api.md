@@ -1,4 +1,4 @@
-# API-контракт «Фокус»
+# API-контракт «To-do»
 
 Base URL для локального запуска:
 
@@ -105,12 +105,13 @@ Authorization: Bearer <token>
 |---|---|---|---|
 | `search` | string | до 255 символов | — |
 | `status` | enum | `pending`, `in_progress`, `completed` | — |
-| `sort` | enum | `due_date`, `status`, `created_at` | `created_at` |
+| `user_id` | integer | существующий пользователь, только для администратора | — |
+| `sort` | enum | `due_date`, `status`, `created_at`, `user` | `created_at` |
 | `direction` | enum | `asc`, `desc` | `desc` |
 | `page` | integer | `>= 1` | `1` |
 | `per_page` | integer | `1..100` | `15` |
 
-При сортировке по статусу порядок `asc` семантический: `pending` → `in_progress` → `completed`. Задачи без дедлайна при сортировке по `due_date` всегда располагаются после задач с датой.
+При сортировке по статусу порядок `asc` семантический: `pending` → `in_progress` → `completed`. Задачи без дедлайна при сортировке по `due_date` всегда располагаются после задач с датой. Сортировка `user` использует имя, затем email владельца.
 
 Пример:
 
@@ -164,12 +165,22 @@ GET /api/tasks?status=in_progress&sort=due_date&direction=asc&page=1&per_page=10
     "in_progress": 1,
     "completed": 1,
     "overdue": 0
+  },
+  "filter_options": {
+    "users": [
+      {
+        "id": 2,
+        "name": "Алексей Смирнов",
+        "email": "user@example.com"
+      }
+    ]
   }
 }
 ```
 
 Фактический объект `meta` также содержит массив ссылок страниц, формируемый Laravel.
 `summary` считается по всем задачам, доступным текущему пользователю, до применения фильтров и пагинации. Поэтому карточки статистики не меняются при переходе между страницами или выборе статуса.
+`filter_options.users` содержит варианты для фильтра владельца только в ответе администратора; обычному пользователю API возвращает пустой массив. Переданный обычным пользователем `user_id` отклоняется с `422`.
 
 ## Создание задачи
 

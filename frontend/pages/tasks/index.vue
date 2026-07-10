@@ -14,6 +14,7 @@ const tasks = useTasksStore()
 const initialQuery = parseTaskQuery(route.query)
 const search = ref(initialQuery.search)
 const status = ref<TaskStatus | ''>(initialQuery.status)
+const userId = ref<number | null>(initialQuery.user_id)
 const sort = ref<TaskQuery['sort']>(initialQuery.sort)
 const direction = ref<TaskQuery['direction']>(initialQuery.direction)
 const page = ref(initialQuery.page)
@@ -33,12 +34,13 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined
 const currentQuery = computed<TaskQuery>(() => ({
   search: search.value,
   status: status.value,
+  user_id: auth.isAdmin ? userId.value : null,
   sort: sort.value,
   direction: direction.value,
   page: page.value,
   per_page: perPage.value,
 }))
-const hasFilters = computed(() => Boolean(search.value.trim() || status.value))
+const hasFilters = computed(() => Boolean(search.value.trim() || status.value || (auth.isAdmin && userId.value)))
 
 onMounted(() => tasks.fetchTasks(currentQuery.value))
 
@@ -56,7 +58,7 @@ watch(search, () => {
   }, 350)
 })
 
-watch([status, sort, direction, perPage], () => {
+watch([status, userId, sort, direction, perPage], () => {
   if (applyingRoute) return
   page.value = 1
   void syncAndFetch()
@@ -73,6 +75,7 @@ watch(() => route.query, async (query) => {
   const parsed = parseTaskQuery(query)
   search.value = parsed.search
   status.value = parsed.status
+  userId.value = parsed.user_id
   sort.value = parsed.sort
   direction.value = parsed.direction
   page.value = parsed.page
@@ -171,6 +174,7 @@ async function resetFilters(): Promise<void> {
   applyingRoute = true
   search.value = ''
   status.value = ''
+  userId.value = null
   sort.value = DEFAULT_TASK_QUERY.sort
   direction.value = DEFAULT_TASK_QUERY.direction
   page.value = 1
@@ -205,8 +209,11 @@ function showToast(message: string, type: 'success' | 'error' = 'success'): void
       <TaskFilters
         v-model:search="search"
         v-model:status="status"
+        v-model:user-id="userId"
         v-model:sort="sort"
         v-model:direction="direction"
+        :is-admin="auth.isAdmin"
+        :users="tasks.availableUsers"
       />
 
       <div class="tasks-workspace">

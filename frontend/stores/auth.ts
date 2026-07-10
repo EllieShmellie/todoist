@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { AuthResponse, User } from '~/types/api'
 
-export const AUTH_TOKEN_KEY = 'focus.auth.token'
+export const AUTH_TOKEN_KEY = 'todo.auth.token'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)

@@ -6,8 +6,10 @@ definePageMeta({ middleware: 'guest' })
 useHead({ title: 'Вход' })
 
 const auth = useAuthStore()
-const email = ref('user@example.com')
-const password = ref('password')
+const config = useRuntimeConfig()
+const demoMode = String(config.public.demoMode).toLowerCase() === 'true'
+const email = ref(demoMode ? 'user@example.com' : '')
+const password = ref(demoMode ? 'password' : '')
 const showPassword = ref(false)
 const errors = ref<{ email?: string, password?: string }>({})
 const requestError = ref('')
@@ -81,7 +83,7 @@ function fillAccount(account: 'user' | 'admin'): void {
               v-model="email"
               type="email"
               autocomplete="email"
-              placeholder="user@example.com"
+              placeholder="name@example.com"
               :aria-invalid="Boolean(errors.email)"
               @input="errors.email = undefined; requestError = ''"
             >
@@ -122,21 +124,23 @@ function fillAccount(account: 'user' | 'admin'): void {
             {{ auth.loading ? 'Входим…' : 'Войти' }}
           </button>
 
-          <div class="auth-form__divider"><span>или</span></div>
+          <template v-if="demoMode">
+            <div class="auth-form__divider"><span>или</span></div>
 
-          <div class="demo-accounts">
-            <Info :size="18" aria-hidden="true" />
-            <div>
-              <p>Тестовые аккаунты, пароль <strong>password</strong></p>
-              <button type="button" @click="fillAccount('user')">user@example.com</button>
-              <span>·</span>
-              <button type="button" @click="fillAccount('admin')">admin@example.com</button>
+            <div class="demo-accounts">
+              <Info :size="18" aria-hidden="true" />
+              <div>
+                <p>Тестовые аккаунты, пароль <strong>password</strong></p>
+                <button type="button" @click="fillAccount('user')">user@example.com</button>
+                <span>·</span>
+                <button type="button" @click="fillAccount('admin')">admin@example.com</button>
+              </div>
             </div>
-          </div>
+          </template>
         </form>
       </div>
     </section>
 
-    <footer class="auth-page__footer">© {{ new Date().getFullYear() }} Фокус. Все права защищены.</footer>
+    <footer class="auth-page__footer">© {{ new Date().getFullYear() }} To-do. Все права защищены.</footer>
   </main>
 </template>

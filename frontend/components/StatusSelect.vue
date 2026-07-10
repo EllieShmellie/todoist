@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LoaderCircle } from '@lucide/vue'
+import { ChevronDown, LoaderCircle } from '@lucide/vue'
 import type { TaskStatus } from '~/types/api'
 import { STATUS_META } from '~/utils/tasks'
 
@@ -31,5 +31,6 @@ function update(event: Event): void {
       <option value="in_progress">В работе</option>
       <option value="completed">Готово</option>
     </select>
+    <ChevronDown class="status-select__chevron" :size="16" aria-hidden="true" />
   </div>
 </template>

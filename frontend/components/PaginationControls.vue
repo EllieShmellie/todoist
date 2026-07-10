@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ChevronDown, ChevronLeft, ChevronRight } from '@lucide/vue'
 import { pagesAround } from '~/utils/tasks'
 
 const props = defineProps<{
@@ -26,7 +26,7 @@ function updatePerPage(event: Event): void {
 <template>
   <nav class="pagination" aria-label="Пагинация задач">
     <div class="pagination__per-page">
-      <label>
+      <label class="pagination__select">
         <span class="sr-only">Задач на странице</span>
         <select :value="perPage" @change="updatePerPage">
           <option :value="5">5 на странице</option>
@@ -35,6 +35,7 @@ function updatePerPage(event: Event): void {
           <option :value="25">25 на странице</option>
           <option :value="50">50 на странице</option>
         </select>
+        <ChevronDown class="pagination__select-chevron" :size="15" aria-hidden="true" />
       </label>
       <span v-if="total" class="pagination__range">{{ from }}–{{ to }} из {{ total }}</span>
     </div>

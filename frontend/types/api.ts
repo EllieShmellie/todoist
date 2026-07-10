@@ -73,6 +73,9 @@ export interface PaginatedResponse<T> {
   links: PaginationLinks
   meta: PaginationMeta
   summary?: TaskSummaryStats
+  filter_options?: {
+    users: TaskOwner[]
+  }
 }
 
 export interface TaskSummaryStats {
@@ -86,7 +89,8 @@ export interface TaskSummaryStats {
 export interface TaskQuery {
   search: string
   status: TaskStatus | ''
-  sort: 'due_date' | 'status' | 'created_at'
+  user_id: number | null
+  sort: 'due_date' | 'status' | 'created_at' | 'user'
   direction: 'asc' | 'desc'
   page: number
   per_page: number

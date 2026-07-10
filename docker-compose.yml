@@ -7,7 +7,7 @@ services:
       dockerfile: docker/backend.Dockerfile
     init: true
     environment:
-      APP_NAME: Todo API
+      APP_NAME: To-do API
       APP_ENV: ${APP_ENV:-local}
       APP_KEY: ${APP_KEY:-}
       APP_DEBUG: ${APP_DEBUG:-true}
@@ -46,9 +46,11 @@ services:
       dockerfile: docker/frontend.Dockerfile
       args:
         NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000/api}
+        NUXT_PUBLIC_DEMO_MODE: ${NUXT_PUBLIC_DEMO_MODE:-false}
     init: true
     environment:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000/api}
+      NUXT_PUBLIC_DEMO_MODE: ${NUXT_PUBLIC_DEMO_MODE:-false}
       NITRO_HOST: 0.0.0.0
       NITRO_PORT: 3000
     ports:

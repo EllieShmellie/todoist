@@ -7,12 +7,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: 'http://localhost:8000/api',
+      demoMode: false,
     },
   },
   app: {
     head: {
       htmlAttrs: { lang: 'ru' },
-      titleTemplate: '%s — Фокус',
+      titleTemplate: '%s — To-do',
       meta: [
         { name: 'description', content: 'Спокойное управление задачами и дедлайнами.' },
         { name: 'theme-color', content: '#ffffff' },

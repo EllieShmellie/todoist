@@ -14,6 +14,7 @@ describe('task query utilities', () => {
     expect(parseTaskQuery({
       search: 'docs',
       status: 'in_progress',
+      user_id: '7',
       sort: 'created_at',
       direction: 'desc',
       page: '3',
@@ -21,6 +22,7 @@ describe('task query utilities', () => {
     })).toEqual({
       search: 'docs',
       status: 'in_progress',
+      user_id: 7,
       sort: 'created_at',
       direction: 'desc',
       page: 3,
@@ -32,6 +34,7 @@ describe('task query utilities', () => {
     expect(parseTaskQuery({ status: 'unknown', sort: 'title', direction: 'sideways', page: '-2' })).toEqual({
       search: '',
       status: '',
+      user_id: null,
       sort: 'due_date',
       direction: 'asc',
       page: 1,
@@ -43,6 +46,7 @@ describe('task query utilities', () => {
     expect(taskQueryToRoute({
       search: '  API  ',
       status: 'pending',
+      user_id: 7,
       sort: 'status',
       direction: 'desc',
       page: 2,
@@ -50,6 +54,7 @@ describe('task query utilities', () => {
     })).toEqual({
       search: 'API',
       status: 'pending',
+      user_id: '7',
       sort: 'status',
       direction: 'desc',
       page: '2',

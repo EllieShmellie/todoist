@@ -9,6 +9,7 @@ export const STATUS_META: Record<TaskStatus, { label: string, color: string }> =
 export const DEFAULT_TASK_QUERY: TaskQuery = {
   search: '',
   status: '',
+  user_id: null,
   sort: 'due_date',
   direction: 'asc',
   page: 1,
@@ -22,7 +23,7 @@ export function isTaskStatus(value: unknown): value is TaskStatus {
 }
 
 export function isSortField(value: unknown): value is TaskQuery['sort'] {
-  return value === 'due_date' || value === 'status' || value === 'created_at'
+  return value === 'due_date' || value === 'status' || value === 'created_at' || value === 'user'
 }
 
 export function isSortDirection(value: unknown): value is TaskQuery['direction'] {
@@ -41,10 +42,12 @@ export function parseTaskQuery(query: Record<string, unknown>): TaskQuery {
   const sortValue = Array.isArray(query.sort) ? query.sort[0] : query.sort
   const directionValue = Array.isArray(query.direction) ? query.direction[0] : query.direction
   const searchValue = Array.isArray(query.search) ? query.search[0] : query.search
+  const userId = parsePositiveInt(query.user_id, 0)
 
   return {
     search: typeof searchValue === 'string' ? searchValue.slice(0, 255) : '',
     status: isTaskStatus(statusValue) ? statusValue : '',
+    user_id: userId || null,
     sort: isSortField(sortValue) ? sortValue : DEFAULT_TASK_QUERY.sort,
     direction: isSortDirection(directionValue) ? directionValue : DEFAULT_TASK_QUERY.direction,
     page: parsePositiveInt(query.page, 1),
@@ -61,6 +64,7 @@ export function taskQueryToRoute(query: TaskQuery): Record<string, string> {
 
   if (query.search.trim()) routeQuery.search = query.search.trim()
   if (query.status) routeQuery.status = query.status
+  if (query.user_id) routeQuery.user_id = String(query.user_id)
   if (query.page > 1) routeQuery.page = String(query.page)
 
   return routeQuery

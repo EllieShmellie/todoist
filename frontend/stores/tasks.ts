@@ -5,6 +5,7 @@ import type {
   PaginationMeta,
   ResourceResponse,
   Task,
+  TaskOwner,
   TaskPayload,
   TaskQuery,
   TaskSummaryStats,
@@ -23,6 +24,7 @@ const EMPTY_META: PaginationMeta = {
 
 export const useTasksStore = defineStore('tasks', () => {
   const items = ref<Task[]>([])
+  const availableUsers = ref<TaskOwner[]>([])
   const meta = ref<PaginationMeta>({ ...EMPTY_META })
   const summary = ref<TaskSummaryStats>({ total: 0, pending: 0, in_progress: 0, completed: 0, overdue: 0 })
   const loading = ref(false)
@@ -45,6 +47,7 @@ export const useTasksStore = defineStore('tasks', () => {
         query: {
           search: query.search.trim() || undefined,
           status: query.status || undefined,
+          user_id: query.user_id || undefined,
           sort: query.sort,
           direction: query.direction,
           page: query.page,
@@ -54,6 +57,7 @@ export const useTasksStore = defineStore('tasks', () => {
 
       if (requestId !== latestRequest) return
       items.value = response.data
+      availableUsers.value = response.filter_options?.users ?? []
       meta.value = response.meta
       summary.value = response.summary ?? {
         total: response.meta.total,
@@ -138,6 +142,7 @@ export const useTasksStore = defineStore('tasks', () => {
 
   return {
     items,
+    availableUsers,
     meta,
     summary,
     loading,

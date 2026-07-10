@@ -8,7 +8,9 @@ RUN npm ci --ignore-scripts
 COPY frontend/ ./
 
 ARG NUXT_PUBLIC_API_BASE=http://localhost:8000/api
+ARG NUXT_PUBLIC_DEMO_MODE=false
 ENV NUXT_PUBLIC_API_BASE=${NUXT_PUBLIC_API_BASE}
+ENV NUXT_PUBLIC_DEMO_MODE=${NUXT_PUBLIC_DEMO_MODE}
 
 RUN npm run postinstall \
     && npm run build
