@@ -3,7 +3,7 @@ import { ChevronDown, LoaderCircle } from '@lucide/vue'
 import type { TaskStatus } from '~/types/api'
 import { STATUS_META } from '~/utils/tasks'
 
-const props = defineProps<{
+defineProps<{
   modelValue: TaskStatus
   disabled?: boolean
 }>()

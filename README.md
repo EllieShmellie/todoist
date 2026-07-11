@@ -1,6 +1,6 @@
 # Laravel + Nuxt To-do
 
-Полноценное тестовое To-Do приложение: REST API на Laravel, интерфейс на Nuxt/Vue, Bearer-авторизация через Sanctum, ролевой доступ и SQLite. Проект закрывает обязательный сценарий задания и дополнительные пункты, которые упрощают проверку решения.
+Небольшое тестовое To-do приложение: REST API на Laravel, интерфейс на Nuxt/Vue, Bearer-авторизация через Sanctum, роли пользователей и SQLite.
 
 ## Что реализовано
 
@@ -19,9 +19,9 @@
 | Слой | Технологии |
 |---|---|
 | Backend | PHP 8.2+, Laravel 12, Eloquent, Sanctum 4 |
-| Frontend | Node.js 22.12+, Nuxt 4, Vue 3, Pinia 3, TypeScript |
+| Frontend | Node.js 22.13+, Nuxt 4, Vue 3, Pinia 3, TypeScript |
 | Данные | SQLite, Laravel migrations/seeders/factories |
-| Тесты | PHPUnit 11, Vitest 4, Vue Test Utils |
+| Проверки | PHPUnit 11, Vitest 4, ESLint, vue-tsc |
 | Запуск | Docker Compose v2, multi-stage frontend image |
 
 ## Архитектура
@@ -36,7 +36,7 @@ flowchart LR
 ```
 
 - `frontend/` — Nuxt-приложение на Vue 3 и Composition API. Отвечает за маршруты, auth-состояние, формы и UI-состояния.
-- `backend/` — Laravel API. Контроллеры остаются тонкими; валидация находится в Form Request, сериализация — в API Resources, доступ — в `TaskPolicy`.
+- `backend/` — Laravel API. Form Requests валидируют входные данные, API Resources формируют ответы, Policies проверяют доступ, а `TaskIndexQuery` собирает сложный список задач.
 - SQLite хранит данные локально. В Docker база лежит в именованном volume и переживает перезапуск контейнеров.
 - Браузер обращается к API напрямую по `http://localhost:8000/api`; имя Docker-сервиса намеренно не используется как публичный URL.
 
@@ -85,7 +85,7 @@ docker compose up --build
 
 - PHP 8.2+ с расширением `pdo_sqlite`;
 - Composer 2;
-- Node.js 22.12+ и npm;
+- Node.js 22.13+ и npm;
 - свободные порты `8000` и `3000`.
 
 ### Backend
@@ -173,7 +173,7 @@ Cookie/CSRF handshake для этого режима не нужен. Автор
 - `page` — номер страницы;
 - `per_page` — от 1 до 100, по умолчанию 15.
 
-Вместе со страницей данных API возвращает `summary` по всем доступным текущему пользователю задачам: общее количество, разбивку по статусам и число просроченных незавершённых задач. Для администратора ответ также содержит список владельцев для поискового фильтра.
+Вместе со страницей данных API возвращает `summary` по всем доступным текущему пользователю задачам. Для администратора ответ также содержит список владельцев для поискового фильтра.
 
 Подробные payload, форматы ответов и cURL-примеры: [docs/api.md](docs/api.md).
 
@@ -187,39 +187,27 @@ API всегда отвечает JSON:
 - `422` — ошибки валидации в объекте `errors`;
 - `500` — непредвиденная серверная ошибка без утечки деталей в production.
 
-Пример ошибки валидации:
-
-```json
-{
-  "message": "The title field is required.",
-  "errors": {
-    "title": ["The title field is required."]
-  }
-}
-```
-
-## Тесты
+## Тесты и проверки
 
 Backend:
 
 ```bash
 cd backend
 composer test
+vendor/bin/pint --test
 ```
 
 Frontend:
 
 ```bash
 cd frontend
+npm run lint
+npm run typecheck
 npm test
-```
-
-Проверка production-сборки frontend:
-
-```bash
-cd frontend
 npm run build
 ```
+
+GitHub Actions запускает backend-тесты и Pint на PHP 8.2–8.4, а отдельный frontend workflow — lint, typecheck, тесты и production build.
 
 ## Реализованные дополнительные цели
 
@@ -231,6 +219,13 @@ npm run build
 - feature-тесты API и frontend-тесты критичных состояний;
 - подробная API-документация;
 - воспроизводимый Docker Compose запуск с health checks и постоянным SQLite volume.
+
+## Trade-offs
+
+- **SQLite.** Выбран для простого воспроизводимого запуска тестового задания. Для приложения с параллельной записью и большим объёмом данных я бы использовал PostgreSQL или MySQL.
+- **Bearer token в `localStorage`.** Упрощает отдельный SPA и API, но токен доступен JavaScript-коду при XSS. Для браузерного production-приложения предпочтительнее stateful Sanctum с HttpOnly/SameSite cookies и CSRF-защитой.
+- **Поиск.** Сейчас используется `LIKE %query%`, чего достаточно для небольшого набора задач. На большой базе понадобятся полнотекстовый поиск или отдельный поисковый индекс.
+- **Слой приложения.** Отдельный query-класс появился только у сложного списка задач; остальные CRUD-операции оставлены без дополнительных абстракций.
 
 ## Примечание о production
 

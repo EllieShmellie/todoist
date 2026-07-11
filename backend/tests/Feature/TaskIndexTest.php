@@ -92,6 +92,34 @@ class TaskIndexTest extends TestCase
             ->assertJsonPath('data.0.title', 'Boris task');
     }
 
+    public function test_admin_can_combine_owner_status_and_search_filters(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $anna = User::factory()->create();
+        $boris = User::factory()->create();
+
+        Task::factory()->for($anna)->create([
+            'title' => 'Prepare release notes',
+            'status' => TaskStatus::Pending,
+        ]);
+        Task::factory()->for($anna)->create([
+            'title' => 'Prepare release build',
+            'status' => TaskStatus::Completed,
+        ]);
+        Task::factory()->for($boris)->create([
+            'title' => 'Prepare release notes',
+            'status' => TaskStatus::Pending,
+        ]);
+        Sanctum::actingAs($admin);
+
+        $this->getJson("/api/tasks?user_id={$anna->id}&status=pending&search=release")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Prepare release notes')
+            ->assertJsonPath('data.0.status', TaskStatus::Pending->value)
+            ->assertJsonPath('data.0.user.id', $anna->id);
+    }
+
     public function test_status_sort_uses_business_order_and_due_date_sort_honors_direction(): void
     {
         $user = User::factory()->create();

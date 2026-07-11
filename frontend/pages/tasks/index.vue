@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Plus } from '@lucide/vue'
 import type { Task, TaskPayload, TaskQuery, TaskStatus } from '~/types/api'
-import { DEFAULT_TASK_QUERY, getApiErrorMessage, parseTaskQuery, taskQueryToRoute } from '~/utils/tasks'
+import { DEFAULT_TASK_QUERY, getApiErrorMessage, pageAfterDeletion, parseTaskQuery, taskQueryToRoute } from '~/utils/tasks'
 
 definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Мои задачи' })
@@ -162,7 +162,8 @@ async function confirmDelete(): Promise<void> {
   try {
     await tasks.deleteTask(task.id)
     deletingTask.value = null
-    if (tasks.items.length === 0 && page.value > 1) page.value -= 1
+    const nextPage = pageAfterDeletion(page.value, tasks.items.length)
+    if (nextPage !== page.value) page.value = nextPage
     else await tasks.fetchTasks(currentQuery.value)
     showToast('Задача удалена')
   } catch (request) {

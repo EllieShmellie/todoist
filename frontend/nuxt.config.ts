@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-07-10',
   ssr: false,
   devtools: { enabled: false },
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', '@nuxt/eslint'],
   css: ['@fontsource-variable/inter/index.css', '~/assets/css/main.css'],
   runtimeConfig: {
     public: {

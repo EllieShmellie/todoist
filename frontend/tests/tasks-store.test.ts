@@ -145,7 +145,7 @@ describe('tasks store API behavior', () => {
   it('removes a task only after deletion succeeds and clears progress state', async () => {
     const first = makeTask()
     const second = makeTask({ id: 2, title: 'Остаться в списке' })
-    const request = deferred<void>()
+    const request = deferred<unknown>()
     api.mockReturnValue(request.promise)
     const store = useTasksStore()
     store.items = [first, second]
@@ -156,7 +156,7 @@ describe('tasks store API behavior', () => {
     expect(store.items).toEqual([first, second])
     expect(api).toHaveBeenCalledWith(`/tasks/${first.id}`, { method: 'DELETE' })
 
-    request.resolve()
+    request.resolve(undefined)
     await result
     expect(store.items).toEqual([second])
     expect(store.deletingId).toBeNull()

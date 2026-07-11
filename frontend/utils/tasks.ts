@@ -141,6 +141,10 @@ export function pagesAround(current: number, last: number): Array<number | 'elli
   return result
 }
 
+export function pageAfterDeletion(currentPage: number, remainingItems: number): number {
+  return remainingItems === 0 && currentPage > 1 ? currentPage - 1 : currentPage
+}
+
 export function getApiErrorData(error: unknown): ApiErrorData {
   if (typeof error !== 'object' || error === null) return {}
   const candidate = error as { data?: ApiErrorData, response?: { _data?: ApiErrorData } }

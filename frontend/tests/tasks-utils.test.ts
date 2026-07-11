@@ -3,6 +3,7 @@ import type { TaskPayload } from '~/types/api'
 import {
   getApiErrorMessage,
   isTaskOverdue,
+  pageAfterDeletion,
   pagesAround,
   parseTaskQuery,
   taskQueryToRoute,
@@ -82,6 +83,12 @@ describe('task validation and presentation utilities', () => {
   it('builds an accessible compact pagination window', () => {
     expect(pagesAround(1, 3)).toEqual([1, 2, 3])
     expect(pagesAround(6, 12)).toEqual([1, 'ellipsis', 5, 6, 7, 'ellipsis', 12])
+  })
+
+  it('moves back after deleting the last task on a non-first page', () => {
+    expect(pageAfterDeletion(3, 0)).toBe(2)
+    expect(pageAfterDeletion(3, 4)).toBe(3)
+    expect(pageAfterDeletion(1, 0)).toBe(1)
   })
 
   it('does not mark completed tasks overdue', () => {
